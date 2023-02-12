@@ -9,6 +9,7 @@ fn startup(
     #[cfg(all(not(feature = "atlas"), feature = "render"))] array_texture_loader: Res<
         ArrayTextureLoader,
     >,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     commands.spawn(Camera2dBundle::default());
 
@@ -90,6 +91,18 @@ fn startup(
         transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 1.0),
         ..Default::default()
     });
+
+    let texture_handle: Handle<Image> = asset_server.load("monsters.png");
+    let texture_atlas =
+        TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 16, 16, None, None);
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    commands.spawn((
+        SpriteSheetBundle {
+            sprite: TextureAtlasSprite { index: 38, ..Default::default() },
+            texture_atlas: texture_atlas_handle,
+            ..default()
+        },
+    ));
 
     // Add atlas to array texture loader so it's preprocessed before we need to use it.
     // Only used when the atlas feature is off and we are using array textures.

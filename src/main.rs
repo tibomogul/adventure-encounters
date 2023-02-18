@@ -30,6 +30,10 @@ fn startup(
     // per layer, each with their own `TileStorage` component.
     let mut tile_storage = TileStorage::empty(map_size);
 
+    let tile_size = TilemapTileSize { x: 32.0, y: 32.0 };
+    let grid_size = tile_size.into();
+    let map_type = TilemapType::default();
+
     // Spawn the elements of the tilemap.
     fill_tilemap(
         TileTextureIndex(51),
@@ -38,10 +42,6 @@ fn startup(
         &mut commands,
         &mut tile_storage,
     );
-
-    let tile_size = TilemapTileSize { x: 32.0, y: 32.0 };
-    let grid_size = tile_size.into();
-    let map_type = TilemapType::default();
 
     commands.entity(tilemap_entity).insert(TilemapBundle {
         grid_size,
@@ -92,6 +92,7 @@ fn startup(
         ..Default::default()
     });
 
+    // Load player sprite
     let texture_handle: Handle<Image> = asset_server.load("monsters.png");
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 16, 16, None, None);
@@ -100,6 +101,7 @@ fn startup(
         SpriteSheetBundle {
             sprite: TextureAtlasSprite { index: 38, ..Default::default() },
             texture_atlas: texture_atlas_handle,
+            transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 2.0),
             ..default()
         },
     ));

@@ -1,7 +1,25 @@
-use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
-
+mod components;
 mod helpers;
+mod systems;
+
+mod prelude {
+    pub use bevy::prelude::*;
+    pub use bevy_ecs_tilemap::prelude::*;
+    pub use bracket_geometry::*;
+    pub use bracket_pathfinding::prelude::*;
+    pub use bracket_random::prelude::*;
+    pub use crate::components::*;
+    pub use crate::helpers::*;
+    pub use crate::systems::*;
+}
+
+use prelude::{
+    *,
+    map::ObjectsMapLayer,
+    map_builder::MapBuilder,
+    illumination::ProvidesIllumination,
+    tiles::TileType
+};
 
 fn startup(
     mut commands: Commands,
@@ -13,9 +31,12 @@ fn startup(
 ) {
     commands.spawn(Camera2dBundle::default());
 
+    let mut rng = RandomNumberGenerator::new();
+    let mut map_builder = MapBuilder::new(80, 50, &mut rng);
+
     let texture_handle: Handle<Image> = asset_server.load("ground.png");
 
-    let map_size = TilemapSize { x: 32, y: 32 };
+    let map_size = TilemapSize { x: map_builder.map.dimensions.x as u32, y: map_builder.map.dimensions.y as u32 };
 
     // Create a tilemap entity a little early.
     // We want this entity early because we need to tell each tile which tilemap entity
@@ -36,7 +57,7 @@ fn startup(
 
     // Spawn the elements of the tilemap.
     fill_tilemap(
-        TileTextureIndex(51),
+        TileTextureIndex(map_builder.theme.tile_to_render(TileType::ThemeFloor).to_texture_index() as u32),
         map_size,
         TilemapId(tilemap_entity),
         &mut commands,
@@ -58,26 +79,21 @@ fn startup(
     let tilemap_entity = commands.spawn_empty().id();
     let mut tile_storage = TileStorage::empty(map_size);
 
-    let mut grid = [[0u32; 32]; 32];
-    for x in 5..10 {
-        for y in 5..10 {
-            if y == 5 || y == 9 || x == 5 || x == 9 { grid[y][x] = 1; }
-        }
-    }
-    for x in 0..map_size.x {
-        for y in 0..map_size.y {
-            if grid[y as usize][x as usize] == 1 {
-                let tile_pos = TilePos { x, y };
-                let tile_entity = commands
-                    .spawn(TileBundle {
-                        position: tile_pos,
-                        tilemap_id: TilemapId(tilemap_entity),
-                        texture_index: TileTextureIndex(233),
-                        ..Default::default()
-                    })
-                    .id();
-                tile_storage.set(&tile_pos, tile_entity);
-            }
+    for x in 0..map_builder.map.dimensions.x {
+        for y in 0..map_builder.map.dimensions.y {
+            let idx = map_builder.map.map_idx(x, y);
+            let tile = map_builder.map.tiles[idx];
+            let tile_pos = map_builder.map.to_bevy_ecs_tilemap(x, y);
+            // let tile_pos = TilePos { x: x as u32, y: y as u32 };
+            let tile_entity = commands
+                .spawn(TileBundle {
+                    position: tile_pos,
+                    tilemap_id: TilemapId(tilemap_entity),
+                    texture_index: TileTextureIndex(tile.tile_type.to_texture_index() as u32),
+                    ..Default::default()
+                })
+                .id();
+            tile_storage.set(&tile_pos, tile_entity);
         }
     }
 
@@ -86,11 +102,48 @@ fn startup(
         map_type,
         size: map_size,
         storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle),
+        texture: TilemapTexture::Single(texture_handle.clone()),
         tile_size,
         transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 1.0),
         ..Default::default()
-    });
+    }).insert(ObjectsMapLayer);
+
+    // // Layer fog of war
+    // let tilemap_entity = commands.spawn_empty().id();
+    // let mut tile_storage = TileStorage::empty(map_size);
+
+    // // Spawn the elements of the tilemap. Using 255, the black tile
+    // // visible false shows the underlying map
+    // // white and fully opaque will show black
+    // // white and 95% opacity shows dim
+    // // black and 95% opacity shows dim much like above
+    // // gray and 95% opacity shows dim much like above
+    // for x in 0..map_size.x {
+    //     for y in 0..map_size.y {
+    //         let tile_pos = TilePos { x, y };
+    //         let tile_entity = commands
+    //             .spawn(TileBundle {
+    //                 position: tile_pos,
+    //                 tilemap_id: TilemapId(tilemap_entity),
+    //                 texture_index: TileTextureIndex(255),
+    //                 color: TileColor(Color::rgba(0.0, 0.0, 0.0, 1.0)),
+    //                 visible: TileVisible(true),
+    //                 ..Default::default()
+    //             })
+    //             .id();
+    //         tile_storage.set(&tile_pos, tile_entity);
+    //     }
+    // }
+    // commands.entity(tilemap_entity).insert(TilemapBundle {
+    //     grid_size,
+    //     map_type,
+    //     size: map_size,
+    //     storage: tile_storage,
+    //     texture: TilemapTexture::Single(texture_handle.clone()),
+    //     tile_size,
+    //     transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 3.0),
+    //     ..Default::default()
+    // }).insert(helpers::map::FogOfWarMapLayer);
 
     // Load player sprite
     let texture_handle: Handle<Image> = asset_server.load("monsters.png");
@@ -104,6 +157,12 @@ fn startup(
             transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 2.0),
             ..default()
         },
+    ));
+
+    // Spawn a light source
+    commands.spawn((
+        TilePos { x: 0, y: 5 },
+        ProvidesIllumination { bright_radius: 30, shadowy_radius: 60, duration: u32::MAX }
     ));
 
     // Add atlas to array texture loader so it's preprocessed before we need to use it.

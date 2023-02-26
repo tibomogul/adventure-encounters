@@ -66,8 +66,8 @@ impl CellularAutomataArchitect {
     }
     fn iteration(&mut self, mb: &mut MapBuilder) {
         let mut new_tiles = mb.map.tiles.clone();
-        for y in 1 .. mb.map.dimensions.x -1 {
-            for x in 1 .. mb.map.dimensions.y -1 {
+        for y in 1 .. mb.map.dimensions.y -1 {
+            for x in 1 .. mb.map.dimensions.x -1 {
                 let neighbors = self.count_neighbors(x, y, mb);
                 let idx = mb.map.map_idx(x, y);
                 if neighbors > 4 || neighbors == 0 {

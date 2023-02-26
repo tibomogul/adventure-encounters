@@ -150,11 +150,16 @@ fn startup(
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 16, 16, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let mut transform = get_tilemap_center_transform(&map_size, &grid_size, &map_type, 2.0);
+    let player_start = map_builder.player_start;
+    let in_b_e_t = map_builder.map.to_bevy_ecs_tilemap(player_start.x, player_start.y);
+    transform.translation.x += (in_b_e_t.x * 32) as f32;
+    transform.translation.y += (in_b_e_t.y * 32) as f32;
     commands.spawn((
         SpriteSheetBundle {
             sprite: TextureAtlasSprite { index: 38, ..Default::default() },
             texture_atlas: texture_atlas_handle,
-            transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 2.0),
+            transform,
             ..default()
         },
     ));

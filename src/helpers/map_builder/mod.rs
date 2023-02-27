@@ -24,6 +24,7 @@ trait MapArchitect {
 
 const NUM_ROOMS: usize = 20;
 
+#[derive(Resource)]
 pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<bracket_geometry::prelude::Rect>,

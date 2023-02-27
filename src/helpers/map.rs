@@ -20,6 +20,16 @@ pub enum SeenType {
     Darkness
 }
 
+#[derive(Component, Copy, Clone, PartialEq)]
+pub struct MapPoint(pub Point);
+
+impl MapPoint {
+    pub fn new(value: Point) -> Self {
+        Self {
+            0: value.clone()
+        }
+    }
+}
 
 pub struct Map {
     pub dimensions: Point,

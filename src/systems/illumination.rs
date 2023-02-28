@@ -35,10 +35,10 @@ pub fn illumination_system(
     mut light_sources: Query<(Entity, &map::MapPoint, &mut ProvidesIllumination)>,
     mb: Res<MapBuilder>
 ) {
-    for (entity, map_point, mut provides_illumination) in light_sources.iter_mut() {
+    for (_entity, map_point, mut provides_illumination) in light_sources.iter_mut() {
         // illuminate all the tiles within the entities' line of sight
         if provides_illumination.is_dirty {
-            let tiles = (provides_illumination.bright_interval + provides_illumination.shadowy_interval) / 5;
+            let tiles = (provides_illumination.bright_interval + provides_illumination.shadowy_interval) / distance::TILE_SIZE_IN_FEET;
             provides_illumination.illuminated_tiles = field_of_view_set(map_point.0, tiles as i32, &mb.map);
             provides_illumination.is_dirty = false;
         }

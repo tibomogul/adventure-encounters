@@ -1,6 +1,5 @@
-mod components;
-mod helpers;
-mod systems;
+pub mod helpers;
+pub mod systems;
 
 mod prelude {
     pub use bevy::prelude::*;
@@ -8,7 +7,6 @@ mod prelude {
     pub use bracket_geometry::*;
     pub use bracket_pathfinding::prelude::*;
     pub use bracket_random::prelude::*;
-    pub use crate::components::*;
     pub use crate::helpers::*;
     pub use crate::systems::*;
 }
@@ -32,7 +30,7 @@ fn startup(
     commands.spawn(Camera2dBundle::default());
 
     let mut rng = RandomNumberGenerator::new();
-    let mut map_builder = MapBuilder::new(80, 50, &mut rng);
+    let map_builder = MapBuilder::new(80, 50, &mut rng);
 
     let texture_handle: Handle<Image> = asset_server.load("ground.png");
 
@@ -194,5 +192,6 @@ fn main() {
         .add_startup_system(startup)
         .add_system(helpers::camera::movement)
         .add_system(systems::illumination::illumination_system)
+        .add_system(systems::field_of_view::field_of_view_system)
         .run();
 }

@@ -4,5 +4,4 @@ pub enum Unit {
     Tiles
 }
 
-const TILE_WIDTH_IN_FEET: u16 = 5;
-const TILE_HEIGHT_IN_FEET: u16 = 5;
+pub const TILE_SIZE_IN_FEET: u16 = 5;

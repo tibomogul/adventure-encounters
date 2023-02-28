@@ -41,7 +41,7 @@ impl Map {
     pub fn new(width: u32, height: u32, theme: MapTheme) -> Self {
         let num_tiles = width * height;
         let mut tiles = Vec::with_capacity(num_tiles as usize);
-        for i in 0..num_tiles {
+        for _i in 0..num_tiles {
             tiles.push(Tile::new(theme.tile_to_render(TileType::ThemeFloor)));
         }
         Self {

@@ -16,7 +16,7 @@ use prelude::{
     map::ObjectsMapLayer,
     map_builder::MapBuilder,
     illumination::ProvidesIllumination,
-    tiles::TileType
+    tiles::TileType, field_of_view::FieldOfView,
 };
 
 fn startup(
@@ -161,6 +161,7 @@ fn startup(
             ..default()
         },
     )).insert(ProvidesIllumination::new(30, 60, None))
+    .insert(FieldOfView::new(60, Some(0), Some(0)))
     .insert(map::MapPoint::new(player_start));
 
     commands.insert_resource(map_builder);

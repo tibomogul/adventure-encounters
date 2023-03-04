@@ -1,4 +1,4 @@
-use crate::prelude::{*, map_builder::MapBuilder, distance::distance_between_points, tiles::Tile};
+use crate::prelude::{*, map_builder::MapBuilder, distance::distance_between_points};
 use std::collections::HashSet;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]

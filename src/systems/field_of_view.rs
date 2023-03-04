@@ -1,5 +1,5 @@
-use crate::prelude::{*, map_builder::MapBuilder, map::{FogOfWarMapLayer, SeenLevel, MapPoint}, distance::distance_between_points, tiles::Tile};
-use std::collections::{HashSet, HashMap};
+use crate::prelude::{*, map_builder::MapBuilder, map::{FogOfWarMapLayer, SeenLevel}, distance::distance_between_points};
+use std::collections::HashSet;
 
 use super::illumination::IlluminationLevel;
 
@@ -92,7 +92,7 @@ pub fn field_of_view_system(
             fov.is_dirty = false;
         }
     }
-    let (mut tile_storage, fog) = fog_of_war.single_mut();
+    let (tile_storage, _) = fog_of_war.single_mut();
     for x in changed {
         let tile_pos = mb.map.to_bevy_ecs_tilemap(x.x, x.y);
         let idx = mb.map.map_idx(x.x, x.y);

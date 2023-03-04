@@ -140,7 +140,7 @@ pub fn field_of_view_system(
                 }
             }
             match tile.seen_level {
-                SeenLevel::Bright => { commands.entity(tile_entity).insert(TileColor(Color::rgba(0.0, 0.0, 0.0, 0.5))); },
+                SeenLevel::Bright => { commands.entity(tile_entity).insert(TileColor(Color::rgba(0.0, 0.0, 0.0, 0.0))); },
                 SeenLevel::Shadowy => { commands.entity(tile_entity).insert(TileColor(Color::rgba(0.0, 0.0, 0.0, 0.90))); },
                 SeenLevel::Darkness => { commands.entity(tile_entity).insert(TileColor(Color::rgba(0.0, 0.0, 0.0, 0.99))); },
                 SeenLevel::None => { commands.entity(tile_entity).insert(TileColor(Color::rgba(0.0, 0.0, 0.0, 1.0))); },

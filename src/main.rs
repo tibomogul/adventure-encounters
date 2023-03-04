@@ -15,7 +15,7 @@ use prelude::{
     *,
     map::ObjectsMapLayer,
     map_builder::MapBuilder,
-    illumination::ProvidesIllumination,
+    illumination::{ProvidesIllumination, illumination_system},
     tiles::TileType, field_of_view::FieldOfView,
 };
 
@@ -80,7 +80,7 @@ fn startup(
     for x in 0..map_builder.map.dimensions.x {
         for y in 0..map_builder.map.dimensions.y {
             let idx = map_builder.map.map_idx(x, y);
-            let tile = map_builder.map.tiles[idx];
+            let tile = &map_builder.map.tiles[idx];
             let tile_pos = map_builder.map.to_bevy_ecs_tilemap(x, y);
             // let tile_pos = TilePos { x: x as u32, y: y as u32 };
             let tile_entity = commands
@@ -193,6 +193,6 @@ fn main() {
         .add_startup_system(startup)
         .add_system(helpers::camera::movement)
         .add_system(systems::illumination::illumination_system)
-        .add_system(systems::field_of_view::field_of_view_system)
+        .add_system(systems::field_of_view::field_of_view_system.after(illumination_system))
         .run();
 }

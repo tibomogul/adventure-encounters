@@ -1,6 +1,6 @@
 use crate::tiles::*;
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MapTheme {
     ForestTheme,
     DungeonTheme,

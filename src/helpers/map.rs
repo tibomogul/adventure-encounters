@@ -13,31 +13,42 @@ pub struct ObjectsMapLayer;
 #[derive(Component)]
 pub struct FloorMapLayer;
 
-#[derive(Copy, Clone, PartialEq)]
-pub enum SeenType {
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub enum SeenLevel {
     Bright,
     Shadowy,
-    Darkness
+    Darkness,
+    None
 }
 
+#[derive(Component, Copy, Clone, PartialEq)]
+pub struct MapPoint(pub Point);
+
+impl MapPoint {
+    pub fn new(value: Point) -> Self {
+        Self {
+            0: value.clone()
+        }
+    }
+}
 
 pub struct Map {
     pub dimensions: Point,
     pub tiles: Vec<Tile>,
-    pub revealed_tiles: Vec<SeenType>
+    pub revealed_tiles: Vec<SeenLevel>
 }
 
 impl Map {
     pub fn new(width: u32, height: u32, theme: MapTheme) -> Self {
         let num_tiles = width * height;
         let mut tiles = Vec::with_capacity(num_tiles as usize);
-        for i in 0..num_tiles {
+        for _i in 0..num_tiles {
             tiles.push(Tile::new(theme.tile_to_render(TileType::ThemeFloor)));
         }
         Self {
             dimensions: Point { x: width as i32, y: height as i32 },
             tiles: tiles,
-            revealed_tiles: vec![SeenType::Darkness; num_tiles as usize]
+            revealed_tiles: vec![SeenLevel::Darkness; num_tiles as usize]
         }
     }
     pub fn map_idx(&self, x: i32, y: i32) -> usize {

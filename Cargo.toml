@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.10.0", features = ["dynamic_linking"] }
-bevy_ecs_tilemap = "0.9.0"
+bevy_ecs_tilemap = { git = "https://github.com/geieredgar/bevy_ecs_tilemap", branch = "bevy_track" }
 bracket-geometry = "0.8.7"
 bracket-pathfinding = "0.8.7"
 bracket-random = "0.8.7"

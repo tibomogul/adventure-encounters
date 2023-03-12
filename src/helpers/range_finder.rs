@@ -81,8 +81,10 @@ impl RangeFinder {
                 // Check if the neighbour has been processed
                 if !(closed_set.contains(&neighbors[i])) {
                     if !grid.contains_key(&neighbors[i]) {
+                        let idx = map.map_idx(neighbors[i].x, neighbors[i].y);
+                        let tile = &map.tiles[idx];
                         grid
-                            .insert(neighbors[i], GridPoint::new(neighbors[i].x as u16, neighbors[i].y as u16, 5));
+                            .insert(neighbors[i], GridPoint::new(neighbors[i].x as u16, neighbors[i].y as u16, tile.terrain_cost as u32));
                     }
                     let mut neighbor = grid.get_mut(&neighbors[i]).unwrap();
 

@@ -1,120 +1,91 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::prelude::*;
 
 use super::map::Map;
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
-pub struct GridPoint<'a> {
+pub struct GridPoint {
     pub point: Point,
     cost: u32,
     g: u32,
-    neighbors: std::vec::Vec<&'a Box<GridPoint<'a>>>,
-    via: Option<&'a Box<GridPoint<'a>>>,
+    neighbors: Vec<Point>,
+    via: Option<Point>,
 }
 
-impl GridPoint<'_> {
-    fn new(x: u16, y: u16, cost: u32) -> Box<Self> {
-        Box::new(Self {
+impl GridPoint {
+    fn new(x: u16, y: u16, cost: u32) -> Self {
+        Self {
             point: Point::new(x, y),
             cost,
             g: 0,
             neighbors: Vec::new(),
             via: None,
-        })
+        }
     }
 }
 
-pub struct RangeFinder<'a> {
-    pub anchor: Point,
-    map: Map,
-    grid: HashMap<Point, Box<GridPoint<'a>>>,
-    open_set: Vec<&'a Box<GridPoint<'a>>>,
-    closed_set: Vec<&'a Box<GridPoint<'a>>>,
-}
+pub struct RangeFinder {}
 
-impl<'a> RangeFinder<'a> {
-    pub fn new(x: u16, y: u16, map: Map) -> Self {
-        Self {
-            anchor: Point::new(x, y),
-            map,
-            grid: HashMap::new(),
-            open_set: Vec::new(),
-            closed_set: Vec::new(),
-        }
-    }
+impl RangeFinder {
+    pub fn compute_grid(anchor: Point, range: u32, map: Map) -> HashMap<Point, GridPoint> {
+        let mut grid: HashMap<Point, GridPoint> = HashMap::new();
+        let mut open_set: HashSet<Point> = HashSet::new();
+        let mut closed_set: HashSet<Point> = HashSet::new();
 
-    fn find_point(&self, point: Point) -> Option<&Box<GridPoint>> {
-        self.grid.get(&point)
-    }
+        grid.insert(anchor, GridPoint::new(anchor.x as u16, anchor.y as u16, 5));
+        open_set.insert(anchor);
 
-    fn find_or_create_point(&mut self, point: Point) -> &mut Box<GridPoint> {
-        if !self.grid.contains_key(&point) {
-            self.grid
-                .insert(point, GridPoint::new(point.x as u16, point.y as u16, 5));
-        }
-        return self.grid.get_mut(&point).unwrap();
-    }
-
-    fn consider_neighbors(&mut self, grid_point: &'a mut Box<GridPoint>) {
-        self.update_neighbors(grid_point);
-        self.open_set.push(grid_point);
-    }
-
-    fn update_neighbors(&self, grid_point: &'a mut Box<GridPoint<'a>>) {
-        if grid_point.point.x < self.map.dimensions.x - 1 {
-            grid_point
-                .neighbors
-                .push(self.find_or_create_point(grid_point.point + Point::new(1, 0)));
-        }
-        if grid_point.point.x > 0 {
-            grid_point
-                .neighbors
-                .push(self.find_or_create_point(grid_point.point + Point::new(-1, 0)));
-        }
-        if grid_point.point.y < self.map.dimensions.y - 1 {
-            grid_point
-                .neighbors
-                .push(self.find_or_create_point(grid_point.point + Point::new(0, 1)));
-        }
-        if grid_point.point.y > 0 {
-            grid_point
-                .neighbors
-                .push(self.find_or_create_point(grid_point.point + Point::new(0, -1)));
-        }
-    }
-
-    pub fn compute_grid(&mut self, range: u32) {
-        self.grid = HashMap::new();
-        self.open_set = Vec::new();
-        self.closed_set = Vec::new();
-
-        let mut start = self.find_or_create_point(self.anchor);
-
-        self.consider_neighbors(start);
-
-        while self.open_set.len() > 0 {
+        while !open_set.is_empty() {
             // get the first with the lowest cost
             // on start this will just be the origin tile, with
             // cost of zero.
-            let mut index_of_lowest = 0;
-            for i in 0..self.open_set.len() {
-                if self.open_set[i].cost < self.open_set[index_of_lowest].cost {
-                    index_of_lowest = i;
+            let mut some_lowest_cost_grid_point: Option<&GridPoint> = None;
+            let mut lowest_cost_point: Option<Point> = None;
+            for point in &open_set {
+                let grid_point = grid.get(&point).unwrap();
+
+                if some_lowest_cost_grid_point.is_none() || some_lowest_cost_grid_point.unwrap().cost < grid_point.cost {
+                    some_lowest_cost_grid_point = Some(grid_point);
+                    lowest_cost_point = Some(grid_point.point.clone());
                 }
             }
 
             //remove current from openSet
-            let current = self.open_set.swap_remove(index_of_lowest);
-            let current_cost = current.g;
-            let neighbors = current.neighbors;
-
+            let lowest_cost_grid_point = some_lowest_cost_grid_point.unwrap();
+            let current_point = lowest_cost_grid_point.point;
+            open_set.remove(&current_point);
+            //add current to closedSet
+            closed_set.insert(current_point);
+            let current_cost = lowest_cost_grid_point.g;
+            let mut neighbors = Vec::new();
+            if current_point.x < map.dimensions.x - 1 {
+                neighbors
+                    .push(current_point + Point::new(1, 0));
+            }
+            if current_point.x > 0 {
+                neighbors
+                    .push(current_point + Point::new(-1, 0));
+            }
+            if current_point.y < map.dimensions.y - 1 {
+                neighbors
+                    .push(current_point + Point::new(0, 1));
+            }
+            if current_point.y > 0 {
+                neighbors
+                    .push(current_point + Point::new(0, -1));
+            }
+    
             // Get all the neighbours, then iterate
             for i in 0..neighbors.len() {
-                let mut neighbor = self.find_or_create_point(neighbors[i].point);
-
                 // Check if the neighbour has been processed
-                if !(self.closed_set.contains(neighbor)) {
+                if !(closed_set.contains(&neighbors[i])) {
+                    if !grid.contains_key(&neighbors[i]) {
+                        grid
+                            .insert(neighbors[i], GridPoint::new(neighbors[i].x as u16, neighbors[i].y as u16, 5));
+                    }
+                    let mut neighbor = grid.get_mut(&neighbors[i]).unwrap();
+
                     // The cost of coming here from the current tile
                     // is the total to the current tile plus
                     // the cost of entering this tile
@@ -129,8 +100,8 @@ impl<'a> RangeFinder<'a> {
                     // If not yet in consideration, all to open set
                     // If already in consideration, and the cost from
                     // current is higher than current total, skip
-                    if !(self.open_set.contains(&neighbor)) {
-                        self.consider_neighbors(neighbor);
+                    if !(open_set.contains(&neighbor.point)) {
+                        open_set.insert(neighbor.point);
                     } else if possible_g >= neighbor.g {
                         continue;
                     }
@@ -138,32 +109,38 @@ impl<'a> RangeFinder<'a> {
                     // Otherwise update current cost, and choose current
                     // as preferred
                     neighbor.g = possible_g;
-                    neighbor.via = Some(current);
+                    neighbor.via = lowest_cost_point;
                 }
             }
-            //add current to closedSet
-            self.closed_set.push(current);
         }
+        grid
     }
 
-    pub fn get_grid(&self) -> Vec<Point> {
-        self.closed_set
-            .into_iter()
+    pub fn get_grid(grid: HashMap<Point, GridPoint>) -> Vec<Point> {
+        grid.clone()
+            .iter()
+            .map(|(_, x)| x )
             .filter(|x| x.via.is_some())
             .map(|x| x.point)
             .collect()
     }
 
-    pub fn get_path_to(&self, point: Point) -> Option<Vec<Point>> {
-        if let Some(mut map_point) = self.find_point(point) {
-            let mut path = Vec::new();
-            path.push(map_point.point);
-            while let Some(via) = map_point.via {
-                path.push(via.point);
-                map_point = via;
+    pub fn get_path_to(grid: HashMap<Point, GridPoint>, point: Point) -> Vec<Point> {
+        let mut path = Vec::new();
+        match grid.get(&point) {
+            None => path,
+            Some(mut grid_point) => {
+                while let Some(via) = grid_point.via {
+                    path.push(via);
+                    match grid.get(&via) {
+                        None => break,
+                        Some(next) => {
+                            grid_point = next;
+                        }
+                    };
+                }
+                path
             }
-            return Some(path); // check order
         }
-        return None;
     }
 }

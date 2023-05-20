@@ -162,7 +162,8 @@ fn startup(
         },
     )).insert(ProvidesIllumination::new(30, 60, None))
     .insert(FieldOfView::new(60, Some(0), Some(0)))
-    .insert(map::MapPoint::new(player_start));
+    .insert(map::MapPoint::new(player_start))
+    .insert(Player);
 
     commands.insert_resource(map_builder);
 
@@ -192,5 +193,6 @@ fn main() {
         .add_system(helpers::camera::movement)
         .add_system(systems::illumination::illumination_system)
         .add_system(systems::field_of_view::field_of_view_system.after(illumination_system))
+        .add_system(systems::player_render_system.after(systems::field_of_view::field_of_view_system))
         .run();
 }

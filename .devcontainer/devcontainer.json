@@ -4,7 +4,7 @@
 		"ghcr.io/devcontainers/features/desktop-lite:1": {},
 		"ghcr.io/devcontainers/features/rust:1": {},
 		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
-			"packages": "g++ pkg-config libx11-dev libasound2-dev libudev-dev mesa-utils vulkan-tools mesa-vulkan-drivers"
+			"packages": "clang pkg-config libx11-dev libasound2-dev libudev-dev mesa-utils vulkan-tools mesa-vulkan-drivers libwayland-dev libxkbcommon-dev"
 		}
 	}
 }

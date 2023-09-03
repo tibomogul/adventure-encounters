@@ -14,7 +14,7 @@ mod prelude {
 use prelude::{
     *,
     map::ObjectsMapLayer,
-    map_builder::MapBuilder,
+    map_builder::{MapBuilder, themes::MapTheme, MapArchitect, rooms::RoomsArchitect},
     illumination::{ProvidesIllumination, illumination_system},
     tiles::TileType, field_of_view::FieldOfView,
 };
@@ -30,7 +30,14 @@ fn startup(
     commands.spawn(Camera2dBundle::default());
 
     let mut rng = RandomNumberGenerator::new();
-    let map_builder = MapBuilder::new(80, 50, &mut rng);
+
+    // Choose how to build the map
+    // This is random
+    let map_builder = MapBuilder::new_random(80, 50, &mut rng);
+    // These three lines are for specific arhictect and theme
+    // let architect: Box<dyn MapArchitect> = Box::new(RoomsArchitect {});
+    // let theme = MapTheme::DungeonTheme;
+    // let map_builder = MapBuilder::new(architect, theme, 80, 50, &mut rng);
 
     let texture_handle: Handle<Image> = asset_server.load("ground.png");
 

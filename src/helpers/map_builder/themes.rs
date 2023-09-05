@@ -1,6 +1,8 @@
+use serde::Deserialize;
+
 use crate::tiles::*;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, Deserialize, PartialEq)]
 pub enum MapTheme {
     ForestTheme,
     DungeonTheme,

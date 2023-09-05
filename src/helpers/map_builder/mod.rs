@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 pub mod automata;
+pub mod custom;
 pub mod drunkard;
 // mod empty;
 pub mod prefab;
@@ -27,6 +28,7 @@ pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<bracket_geometry::prelude::Rect>,
     pub monster_spawns: Vec<Point>,
+    pub entity_spawns: Vec<(Point, char)>,
     pub player_start: Point,
     pub amulet_start: Point,
     pub theme : MapTheme

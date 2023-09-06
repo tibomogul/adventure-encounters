@@ -11,6 +11,8 @@ bevy_ecs_tilemap = "0.10.0"
 bracket-geometry = "0.8.7"
 bracket-pathfinding = "0.8.7"
 bracket-random = "0.8.7"
+ron = "0.8.1"
+serde = "1.0.188"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

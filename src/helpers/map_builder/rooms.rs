@@ -18,6 +18,7 @@ impl MapArchitect for RoomsArchitect {
             map,
             rooms: Vec::new(),
             monster_spawns : Vec::new(),
+            entity_spawns: Vec::new(),
             player_start : Point::zero(),
             amulet_start : Point::zero(),
             theme,

@@ -8,13 +8,18 @@ pub enum IlluminationLevel {
     Normal
 }
 
+/*
+    Illumination strength are represented by the bright and shadowy intervals. For example,
+    a candle may only have a shadowy interval and not a bright interval. A lantern may have a bright interval of 10 feet.
+    A campfire may have a bright interval of 30 feet.
+ */
 #[derive(Component, Clone, Debug, PartialEq)]
 pub struct ProvidesIllumination {
-    pub illuminated_tiles: HashSet<Point>,
+    pub illuminated_tiles: HashSet<Point>, // set of tiles affected by this illumination source
     pub bright_interval: u16, // feet from origin
     pub shadowy_interval: u16, // feet, beyond bright
     pub duration: Option<u32>, // in minutes, None means infinite, 0 is burned out
-    pub is_dirty: bool
+    pub is_dirty: bool // if true, the illuminated tiles need to be recomputed
 }
 
 impl ProvidesIllumination {
@@ -94,7 +99,7 @@ pub fn illumination_system(
                 _ => {}
             }
         }
-        if normal_count > 0 || dim_count > 1 {
+        if normal_count > 0 || dim_count > 1 { // TODO: Compounding illumination level from multiple sources
             tile.illumination_level = IlluminationLevel::Normal;
         } else if dim_count > 0 {
             tile.illumination_level = IlluminationLevel::Dim;

@@ -171,7 +171,7 @@ fn startup(
         },
     ))
     // .insert(ProvidesIllumination::new(30, 60, None))
-    .insert(FieldOfView::new(60, Some(0), Some(0)))
+    .insert(FieldOfView::new(120, Some(0), Some(0)))
     .insert(map::MapPoint::new(player_start))
     .insert(Player);
 
